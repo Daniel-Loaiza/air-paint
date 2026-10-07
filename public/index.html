@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Air Paint — Lienzo colaborativo</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <div><h1>Air Paint</h1><p>Dibuja en el aire. Todos ven el mismo lienzo.</p></div>
+    <div class="status"><span id="socketDot" class="dot"></span><span id="connection">Conectando…</span> · <strong id="users">0</strong> conectados</div>
+  </header>
+
+  <main>
+    <section class="canvas-panel">
+      <div class="toolbar">
+        <label>Color <input id="color" type="color" value="#2563eb"></label>
+        <label>Grosor <input id="width" type="range" min="2" max="20" value="6"><span id="widthValue">6</span></label>
+        <button id="clear" class="danger">Borrar lienzo para todos</button>
+      </div>
+      <div class="canvas-wrap"><canvas id="paint"></canvas><div id="cursor" class="cursor" hidden></div></div>
+    </section>
+
+    <aside>
+      <div class="camera-card">
+        <div class="camera-head"><strong>Tu cámara</strong><span id="handStatus">Sin iniciar</span></div>
+        <div class="video-wrap"><video id="webcam" autoplay playsinline muted></video></div>
+        <button id="startCamera" class="primary">Activar cámara</button>
+        <p id="cameraMessage" class="message">La cámara se procesa solo en este navegador.</p>
+      </div>
+      <div class="help">
+        <h2>Gestos</h2>
+        <p><b>☝ Índice arriba:</b> dibuja.</p>
+        <p><b>✌ Índice + medio:</b> mueve el cursor sin pintar.</p>
+        <p class="small">Consejo: muestra la palma a la cámara y mantén los otros dedos recogidos para dibujar.</p>
+      </div>
+    </aside>
+  </main>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

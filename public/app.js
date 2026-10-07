@@ -48,11 +48,22 @@ new ResizeObserver(resizeCanvas).observe(canvas.parentElement);
 
 async function initHands(){
   if(handLandmarker)return;
+
   message.textContent='Cargando detector de manos…';
-  const vision=await FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22-rc.20250304/wasm');
+
+  const vision=await FilesetResolver.forVisionTasks(
+    'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22-rc.20250304/wasm'
+  );
+
   handLandmarker=await HandLandmarker.createFromOptions(vision,{
-    baseOptions:{modelAssetPath:'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task',delegate:'GPU'},
-    runningMode:'VIDEO',numHands:1,minHandDetectionConfidence:.55,minHandPresenceConfidence:.55,minTrackingConfidence:.55
+    baseOptions:{
+      modelAssetPath:'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task'
+    },
+    runningMode:'VIDEO',
+    numHands:1,
+    minHandDetectionConfidence:.55,
+    minHandPresenceConfidence:.55,
+    minTrackingConfidence:.55
   });
 }
 

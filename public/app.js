@@ -79,15 +79,99 @@ async function loop(){
   requestAnimationFrame(loop);
 }
 
-startBtn.addEventListener('click',async()=>{
-  try{
-    startBtn.disabled=true;
+startBtn.addEventListener('click', async () => {
+  try {
+    startBtn.disabled = true;
+    handStatus.textContent = 'Iniciando cámara…';
+    message.textContent = 'Solicitando acceso a la cámara…';
+
+    // Comprobaciones del navegador
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      throw new Error('Este navegador no soporta acceso a cámara.');
+    }
+
+    // Si quedó algún stream anterior, detenerlo
+    if (video.srcObject) {
+      video.srcObject.getTracks().forEach(track => track.stop());
+      video.srcObject = null;
+    }
+
+    // Abrir primero la cámara
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        width: { ideal: 640 },
+        height: { ideal: 480 }
+      },
+      audio: false
+    });
+
+    console.log('Cámara obtenida correctamente:', stream);
+
+    video.srcObject = stream;
+
+    await new Promise(resolve => {
+      video.onloadedmetadata = resolve;
+    });
+
+    await video.play();
+
+    console.log(
+      'Cámara activa:',
+      stream.getVideoTracks()[0]?.label
+    );
+
+    handStatus.textContent = 'Cámara activa. Cargando detector…';
+    message.textContent = 'Cámara iniciada correctamente.';
+
+    // Inicializamos MediaPipe DESPUÉS de comprobar la cámara
     await initHands();
-    const stream=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:640},height:{ideal:480},facingMode:'user'},audio:false});
-    video.srcObject=stream; await video.play(); running=true; startBtn.textContent='Cámara activa'; handStatus.textContent='Buscando mano…';
-    message.textContent='Tu video no se envía al servidor; solo se comparten los trazos.'; loop();
-  }catch(err){
-    console.error(err); startBtn.disabled=false; handStatus.textContent='Error de cámara';
-    message.textContent='No pude abrir la cámara. Usa Chrome, permite el acceso y abre la app mediante HTTPS o localhost.';
+
+    running = true;
+    lastVideoTime = -1;
+
+    startBtn.textContent = 'Cámara activa';
+    handStatus.textContent = 'Buscando mano…';
+
+    message.textContent =
+      'Tu video no se envía al servidor; solo se comparten los trazos.';
+
+    loop();
+
+  } catch (err) {
+
+    console.error('ERROR DE CÁMARA:', err);
+    console.error('Nombre:', err.name);
+    console.error('Mensaje:', err.message);
+
+    startBtn.disabled = false;
+    startBtn.textContent = 'Reintentar cámara';
+
+    handStatus.textContent = 'Error de cámara';
+
+    if (err.name === 'NotAllowedError') {
+
+      message.textContent =
+        'Chrome no tiene permiso para usar la cámara. Permite el acceso y vuelve a intentarlo.';
+
+    } else if (err.name === 'NotFoundError') {
+
+      message.textContent =
+        'No se encontró ninguna cámara conectada.';
+
+    } else if (err.name === 'NotReadableError') {
+
+      message.textContent =
+        'La cámara está ocupada. Cierra otras aplicaciones que puedan estar utilizándola y pulsa Reintentar cámara.';
+
+    } else if (err.name === 'OverconstrainedError') {
+
+      message.textContent =
+        'La cámara no admite la configuración solicitada.';
+
+    } else {
+
+      message.textContent =
+        `Error: ${err.name || 'desconocido'} — ${err.message}`;
+    }
   }
 });
